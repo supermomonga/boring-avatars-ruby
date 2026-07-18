@@ -1,0 +1,6 @@
+class BoringAvatarsRbsContract
+  include BoringAvatars::Bindings::Rails::ViewHelper
+
+  def core_avatar: () -> String
+  def rails_avatar: () -> String
+end

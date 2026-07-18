@@ -1,0 +1,2 @@
+BoringAvatars.generate
+BoringAvatars::Bindings::Rails::ViewHelper#boring_avatar

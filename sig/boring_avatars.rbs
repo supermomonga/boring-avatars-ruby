@@ -1,0 +1,44 @@
+module BoringAvatars
+  type variant =
+    :marble | :beam | :pixel | :sunset | :ring | :bauhaus |
+    "marble" | "beam" | "pixel" | "sunset" | "ring" | "bauhaus"
+
+  type size = Integer | Float | String
+  type attribute_key = String | Symbol
+  type attribute_value = String | Numeric | bool | nil
+  type rails_attribute_value =
+    attribute_value |
+    Array[String] |
+    Hash[attribute_key, attribute_value]
+
+  VERSION: String
+
+  def self.generate: (
+    String name,
+    ?variant: variant,
+    ?colors: Array[String],
+    ?size: size,
+    ?square: bool,
+    ?title: bool,
+    ?id_prefix: String?,
+    ?attributes: Hash[attribute_key, attribute_value]
+  ) -> String
+
+  module Bindings
+    module Rails
+      module ViewHelper
+        def boring_avatar: (
+          String name,
+          ?variant: variant,
+          ?colors: Array[String],
+          ?size: size,
+          ?square: bool,
+          ?title: bool,
+          ?id_prefix: String?,
+          **rails_attribute_value svg_attributes
+        ) -> String
+      end
+    end
+  end
+end
+

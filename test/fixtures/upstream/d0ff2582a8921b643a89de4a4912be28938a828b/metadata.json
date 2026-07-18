@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/boringdesigners/boring-avatars",
+  "commit": "d0ff2582a8921b643a89de4a4912be28938a828b",
+  "package_version": "2.0.4",
+  "renderer": "react-dom/server renderToStaticMarkup",
+  "node_version": "26.3.1",
+  "npm_version": "11.16.0",
+  "name": "Maria Mitchell",
+  "options": {
+    "colors": [
+      "#92A1C6",
+      "#146A7C",
+      "#F0AB3D",
+      "#C271B4",
+      "#C20D90"
+    ],
+    "size": "40px",
+    "square": false,
+    "title": false
+  }
+}

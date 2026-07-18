@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "json"
+require "open3"
+
+UPSTREAM_SHA = "d0ff2582a8921b643a89de4a4912be28938a828b"
+VARIANTS = %w[marble beam pixel sunset ring bauhaus].freeze
+NAME = "Maria Mitchell"
+DEFAULT_COLORS = ["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"].freeze
+
+def run!(*command, chdir:)
+  output, error, status = Open3.capture3(*command, chdir: chdir)
+  abort error unless status.success?
+
+  output
+end
+
+upstream_path = File.expand_path(ARGV.fetch(0) do
+  abort "usage: script/update_upstream_fixtures PATH_TO_BORING_AVATARS_CHECKOUT"
+end)
+actual_sha = run!("git", "rev-parse", "HEAD", chdir: upstream_path).strip
+abort "expected upstream #{UPSTREAM_SHA}, got #{actual_sha}" unless actual_sha == UPSTREAM_SHA
+
+run!("npm", "ci", chdir: upstream_path)
+run!("npm", "run", "build", chdir: upstream_path)
+
+node_program = <<~JAVASCRIPT
+  import React from "react";
+  import { renderToStaticMarkup } from "react-dom/server";
+  import Avatar from "./dist/index.js";
+
+  const variants = #{JSON.generate(VARIANTS)};
+  for (const variant of variants) {
+    const svg = renderToStaticMarkup(
+      React.createElement(Avatar, { name: #{JSON.generate(NAME)}, variant })
+    );
+    process.stdout.write(JSON.stringify({ variant, svg }) + "\\n");
+  }
+JAVASCRIPT
+rendered = run!("node", "--input-type=module", "-e", node_program, chdir: upstream_path)
+fixtures = rendered.lines.map { |line| JSON.parse(line, symbolize_names: true) }
+
+fixture_root = File.expand_path(
+  "../test/fixtures/upstream/#{UPSTREAM_SHA}",
+  __dir__
+)
+FileUtils.mkdir_p(fixture_root)
+fixtures.each do |fixture|
+  File.write(File.join(fixture_root, "#{fixture.fetch(:variant)}.svg"), "#{fixture.fetch(:svg)}\n")
+end
+
+package = JSON.parse(File.read(File.join(upstream_path, "package.json")))
+metadata = {
+  repository: "https://github.com/boringdesigners/boring-avatars",
+  commit: UPSTREAM_SHA,
+  package_version: package.fetch("version"),
+  renderer: "react-dom/server renderToStaticMarkup",
+  node_version: run!("node", "--version", chdir: upstream_path).strip.delete_prefix("v"),
+  npm_version: run!("npm", "--version", chdir: upstream_path).strip,
+  name: NAME,
+  options: {
+    colors: DEFAULT_COLORS,
+    size: "40px",
+    square: false,
+    title: false
+  }
+}
+File.write(File.join(fixture_root, "metadata.json"), "#{JSON.pretty_generate(metadata)}\n")
+
+puts "Updated #{fixtures.length} fixtures in #{fixture_root}"
+
