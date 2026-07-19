@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - lib/boring_avatars/version.rb
   workflow_dispatch:
 
 permissions:
