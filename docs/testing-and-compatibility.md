@@ -67,7 +67,7 @@
 1. pinned SHAを一時directoryへcheckoutする。
 2. lockfileどおり `npm ci` とbuildを行う。
 3. `react-dom/server` の `renderToStaticMarkup` で公開 `Avatar` componentを描画する。
-4. 入力optionとraw SVGをfixtureへ保存する。
+4. 入力optionとraw SVGをJSON Lines fixtureへ保存する。
 5. fixture metadataへupstream repository、full SHA、Node/npm version、生成commandを記録する。
 
 fixture更新scriptはnetworkやupstreamのdefault branchを暗黙参照せず、記録されたSHAを必須引数にする。通常のRuby test実行時はNodeやnetworkを必要とせず、commit済みfixtureだけを読む。
@@ -88,6 +88,8 @@ ReactとRubyで異なる内部IDを比較可能にするため、双方をXMLと
 
 ## Fixtureケース
 
+upstream parity fixtureは17ケース × 全6 variantの102件をtable-driven testとして持つ。fixtureケース定義は `test/support/upstream_fixture_cases.rb` を生成scriptと比較testで共有し、ケース定義・生成結果・比較入力の乖離を防ぐ。raw SVGは `fixtures.jsonl` の1行1件として保存し、metadataにはケース定義と件数を記録する。
+
 最低限、次を固定fixtureまたはtable-driven testとして持つ。
 
 ### 描画
@@ -96,8 +98,10 @@ ReactとRubyで異なる内部IDを比較可能にするため、双方をXMLと
 - 全6 variantの `square: true`
 - 全6 variantの `title: true`
 - palette長1、2、5
-- 数値sizeとstring size
+- 整数・小数の数値sizeとstring size
 - ASCIIの似た名前と長い名前
+- 空文字、日本語、emoji、合成文字、分解文字
+- XML escapeが必要な文字を含むtitle
 
 ### Unicode/hash
 

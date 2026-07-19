@@ -4,11 +4,11 @@
 require "fileutils"
 require "json"
 require "open3"
+require_relative "../test/support/upstream_fixture_cases"
 
-UPSTREAM_SHA = "d0ff2582a8921b643a89de4a4912be28938a828b"
-VARIANTS = %w[marble beam pixel sunset ring bauhaus].freeze
-NAME = "Maria Mitchell"
-DEFAULT_COLORS = ["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"].freeze
+UPSTREAM_SHA = UpstreamFixtureCases::UPSTREAM_SHA
+VARIANTS = UpstreamFixtureCases::VARIANTS
+CASES = UpstreamFixtureCases::CASES
 
 def run!(*command, chdir:)
   output, error, status = Open3.capture3(*command, chdir: chdir)
@@ -23,6 +23,12 @@ end)
 actual_sha = run!("git", "rev-parse", "HEAD", chdir: upstream_path).strip
 abort "expected upstream #{UPSTREAM_SHA}, got #{actual_sha}" unless actual_sha == UPSTREAM_SHA
 
+package = JSON.parse(File.read(File.join(upstream_path, "package.json")))
+actual_version = package.fetch("version")
+unless actual_version == UpstreamFixtureCases::PACKAGE_VERSION
+  abort "expected package version #{UpstreamFixtureCases::PACKAGE_VERSION}, got #{actual_version}"
+end
+
 run!("npm", "ci", chdir: upstream_path)
 run!("npm", "run", "build", chdir: upstream_path)
 
@@ -31,27 +37,42 @@ node_program = <<~JAVASCRIPT
   import { renderToStaticMarkup } from "react-dom/server";
   import Avatar from "./dist/index.js";
 
+  const cases = #{JSON.generate(CASES)};
   const variants = #{JSON.generate(VARIANTS)};
-  for (const variant of variants) {
-    const svg = renderToStaticMarkup(
-      React.createElement(Avatar, { name: #{JSON.generate(NAME)}, variant })
-    );
-    process.stdout.write(JSON.stringify({ variant, svg }) + "\\n");
+  for (const fixtureCase of cases) {
+    for (const variant of variants) {
+      const props = {
+        name: fixtureCase.name,
+        variant,
+        ...fixtureCase.options,
+      };
+      const svg = renderToStaticMarkup(
+        React.createElement(Avatar, props)
+      );
+      process.stdout.write(JSON.stringify({
+        id: `${fixtureCase.id}--${variant}`,
+        case_id: fixtureCase.id,
+        variant,
+        svg,
+      }) + "\\n");
+    }
   }
 JAVASCRIPT
 rendered = run!("node", "--input-type=module", "-e", node_program, chdir: upstream_path)
-fixtures = rendered.lines.map { |line| JSON.parse(line, symbolize_names: true) }
+fixtures = rendered.lines.map { |line| JSON.parse(line) }
+expected_count = CASES.length * VARIANTS.length
+abort "expected #{expected_count} fixtures, got #{fixtures.length}" unless fixtures.length == expected_count
+
+fixture_ids = fixtures.map { |fixture| fixture.fetch("id") }
+abort "fixture IDs must be unique" unless fixture_ids.uniq.length == fixture_ids.length
 
 fixture_root = File.expand_path(
   "../test/fixtures/upstream/#{UPSTREAM_SHA}",
   __dir__
 )
 FileUtils.mkdir_p(fixture_root)
-fixtures.each do |fixture|
-  File.write(File.join(fixture_root, "#{fixture.fetch(:variant)}.svg"), "#{fixture.fetch(:svg)}\n")
-end
+File.write(File.join(fixture_root, "fixtures.jsonl"), rendered)
 
-package = JSON.parse(File.read(File.join(upstream_path, "package.json")))
 metadata = {
   repository: "https://github.com/boringdesigners/boring-avatars",
   commit: UPSTREAM_SHA,
@@ -59,15 +80,11 @@ metadata = {
   renderer: "react-dom/server renderToStaticMarkup",
   node_version: run!("node", "--version", chdir: upstream_path).strip.delete_prefix("v"),
   npm_version: run!("npm", "--version", chdir: upstream_path).strip,
-  name: NAME,
-  options: {
-    colors: DEFAULT_COLORS,
-    size: "40px",
-    square: false,
-    title: false
-  }
+  default_colors: UpstreamFixtureCases::DEFAULT_COLORS,
+  variants: VARIANTS,
+  cases: CASES,
+  fixture_count: fixtures.length
 }
 File.write(File.join(fixture_root, "metadata.json"), "#{JSON.pretty_generate(metadata)}\n")
 
 puts "Updated #{fixtures.length} fixtures in #{fixture_root}"
-

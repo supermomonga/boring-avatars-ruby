@@ -5,17 +5,136 @@
   "renderer": "react-dom/server renderToStaticMarkup",
   "node_version": "26.3.1",
   "npm_version": "11.16.0",
-  "name": "Maria Mitchell",
-  "options": {
-    "colors": [
-      "#92A1C6",
-      "#146A7C",
-      "#F0AB3D",
-      "#C271B4",
-      "#C20D90"
-    ],
-    "size": "40px",
-    "square": false,
-    "title": false
-  }
+  "default_colors": [
+    "#92A1C6",
+    "#146A7C",
+    "#F0AB3D",
+    "#C271B4",
+    "#C20D90"
+  ],
+  "variants": [
+    "marble",
+    "beam",
+    "pixel",
+    "sunset",
+    "ring",
+    "bauhaus"
+  ],
+  "cases": [
+    {
+      "id": "default",
+      "name": "Maria Mitchell",
+      "options": {}
+    },
+    {
+      "id": "square",
+      "name": "Maria Mitchell",
+      "options": {
+        "square": true
+      }
+    },
+    {
+      "id": "title",
+      "name": "Maria Mitchell",
+      "options": {
+        "title": true
+      }
+    },
+    {
+      "id": "palette-one",
+      "name": "Maria Mitchell",
+      "options": {
+        "colors": [
+          "#123456"
+        ]
+      }
+    },
+    {
+      "id": "palette-two",
+      "name": "Maria Mitchell",
+      "options": {
+        "colors": [
+          "#000000",
+          "#FFFFFF"
+        ]
+      }
+    },
+    {
+      "id": "palette-five",
+      "name": "Maria Mitchell",
+      "options": {
+        "colors": [
+          "#112233",
+          "#445566",
+          "#778899",
+          "#AABBCC",
+          "#DDEEFF"
+        ]
+      }
+    },
+    {
+      "id": "size-integer",
+      "name": "Maria Mitchell",
+      "options": {
+        "size": 72
+      }
+    },
+    {
+      "id": "size-float",
+      "name": "Maria Mitchell",
+      "options": {
+        "size": 37.5
+      }
+    },
+    {
+      "id": "size-string",
+      "name": "Maria Mitchell",
+      "options": {
+        "size": "3.5rem"
+      }
+    },
+    {
+      "id": "ascii-neighbor",
+      "name": "Maria Mitchel",
+      "options": {}
+    },
+    {
+      "id": "long-name",
+      "name": "Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace Ada Lovelace",
+      "options": {}
+    },
+    {
+      "id": "empty-name",
+      "name": "",
+      "options": {}
+    },
+    {
+      "id": "japanese",
+      "name": "日本語",
+      "options": {}
+    },
+    {
+      "id": "emoji",
+      "name": "😀",
+      "options": {}
+    },
+    {
+      "id": "unicode-composed",
+      "name": "é",
+      "options": {}
+    },
+    {
+      "id": "unicode-decomposed",
+      "name": "é",
+      "options": {}
+    },
+    {
+      "id": "escaped-title",
+      "name": "<Admin & \"Owner\">",
+      "options": {
+        "title": true
+      }
+    }
+  ],
+  "fixture_count": 102
 }
