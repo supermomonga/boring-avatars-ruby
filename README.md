@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/boring_avatars.svg)](https://badge.fury.io/rb/boring_avatars)
+
 # boring_avatars
 
 `boring_avatars` is a Ruby port of [Boring Avatars](https://boringavatars.com/).
